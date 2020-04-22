@@ -29,15 +29,16 @@ echo "Spun up OpenPose: $OPENPOSE_CONTAINER_ID"
 
 docker exec -it $OPENPOSE_CONTAINER_ID \
     ./build/examples/openpose/openpose.bin \
-    --image_dir data \
+    --image_dir /data \
     --model_pose BODY_25 \
     --display 0 \
     --render_pose 2 \
     --hand \
     --hand_render 2 \
     --disable_blending \
-    --write_images out/render \
-    --write_json out/keypoints
+    --write_images /out/render \
+    --write_json /out/keypoints
 
 # Kill the OpenPose Container
 docker kill $OPENPOSE_CONTAINER_ID
+docker container rm $OPENPOSE_CONTAINER_ID

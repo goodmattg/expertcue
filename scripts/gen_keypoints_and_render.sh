@@ -14,13 +14,13 @@ docker run -d \
   -e DISPLAY \
   --runtime=nvidia \
   --mount type=bind,source=$IN_DIR,target=/data \
-  --mount type=bind,source=$OUT_DIR,target=/out
+  --mount type=bind,source=$OUT_DIR,target=/out \
   --mount type=bind,source=/home/goodmanm/expertcue,target=/expertcue \
   exsidius/openpose:openpose
 
 # OpenPose container must be named 'pose' for this to work
 OPENPOSE_CONTAINER_ID=$(docker ps -aqf "name=pose")
-
+echo "Spun up OpenPose: $OPENPOSE_CONTAINER_ID"
 
 docker exec -it $OPENPOSE_CONTAINER_ID \
     ./build/examples/openpose/openpose.bin \

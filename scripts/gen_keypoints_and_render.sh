@@ -6,11 +6,11 @@ trap 'echo "\"${last_command}\" command filed with exit code $?."' EXIT
 
 IN_DIR=$1
 OUT_DIR=$2
+echo "Frame directory: $PWD/$IN_DIR"
+echo "Output directory: $PWD/$OUT_DIR"
 
 mkdir -p $OUT_DIR/render
 mkdir -p $OUT_DIR/keypoints
-
-BASE_PATH=$(echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")")
 
 # Spin up OpenPose container named 'pose'
 docker run -d \
@@ -19,8 +19,8 @@ docker run -d \
   --net=host \
   -e DISPLAY \
   --runtime=nvidia \
-  --mount type=bind,source=$BASE_PATH$IN_DIR,target=/data \
-  --mount type=bind,source=$BASE_PATH$OUT_DIR,target=/out \
+  --mount type=bind,source=$PWD/$IN_DIR,target=/data \
+  --mount type=bind,source=$PWD/$OUT_DIR,target=/out \
   exsidius/openpose:openpose
 
 # OpenPose container must be named 'pose' for this to work

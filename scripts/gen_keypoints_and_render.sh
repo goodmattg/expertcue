@@ -6,4 +6,33 @@ OUT_DIR=$2
 mkdir -p $OUT_DIR/render
 mkdir -p $OUT_DIR/keypoints
 
-./build/examples/openpose/openpose.bin --image_dir $IN_DIR --model_pose BODY_25 --display 0 --render_pose 2 --hand --hand_render 2 --disable_blending --write_images $OUT_DIR/render --write_json $OUT_DIR/keypoints
+# Spin up OpenPose container named 'pose'
+docker run -d \
+  -it \
+  --name pose \
+  --net=host \
+  -e DISPLAY \
+  --runtime=nvidia \
+  --mount type=bind,source=$IN_DIR,target=/data \
+  --mount type=bind,source=$OUT_DIR,target=/out
+  --mount type=bind,source=/home/goodmanm/expertcue,target=/expertcue \
+  exsidius/openpose:openpose
+
+# OpenPose container must be named 'pose' for this to work
+OPENPOSE_CONTAINER_ID=$(docker ps -aqf "name=pose")
+
+
+docker exec -it $OPENPOSE_CONTAINER_ID \
+    ./build/examples/openpose/openpose.bin \
+    --image_dir data \
+    --model_pose BODY_25 \
+    --display 0 \
+    --render_pose 2 \
+    --hand \
+    --hand_render 2 \
+    --disable_blending \
+    --write_images out/render \
+    --write_json out/keypoints
+
+# Kill the OpenPose Container
+docker kill $OPENPOSE_CONTAINER_ID

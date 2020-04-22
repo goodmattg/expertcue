@@ -1,4 +1,8 @@
 #!/bin/bash
+set -e
+
+trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
+trap 'echo "\"${last_command}\" command filed with exit code $?."' EXIT
 
 IN_DIR=$1
 OUT_DIR=$2
@@ -17,7 +21,6 @@ docker run -d \
   --runtime=nvidia \
   --mount type=bind,source=$BASE_PATH$IN_DIR,target=/data \
   --mount type=bind,source=$BASE_PATH$OUT_DIR,target=/out \
-  --mount type=bind,source=/home/goodmanm/expertcue,target=/expertcue \
   exsidius/openpose:openpose
 
 # OpenPose container must be named 'pose' for this to work

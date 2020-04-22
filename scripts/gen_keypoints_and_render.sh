@@ -6,6 +6,8 @@ OUT_DIR=$2
 mkdir -p $OUT_DIR/render
 mkdir -p $OUT_DIR/keypoints
 
+BASE_PATH=$(echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")")
+
 # Spin up OpenPose container named 'pose'
 docker run -d \
   -it \
@@ -13,8 +15,8 @@ docker run -d \
   --net=host \
   -e DISPLAY \
   --runtime=nvidia \
-  --mount type=bind,source=$IN_DIR,target=/data \
-  --mount type=bind,source=$OUT_DIR,target=/out \
+  --mount type=bind,source=$BASE_PATH$IN_DIR,target=/data \
+  --mount type=bind,source=$BASE_PATH$OUT_DIR,target=/out \
   --mount type=bind,source=/home/goodmanm/expertcue,target=/expertcue \
   exsidius/openpose:openpose
 

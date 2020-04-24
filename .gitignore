@@ -113,6 +113,7 @@ ENV/
 *.avi
 
 # Data files
+/data
 *.h5
 
 # Notebooks

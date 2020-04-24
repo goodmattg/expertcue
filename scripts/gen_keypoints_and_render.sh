@@ -42,3 +42,7 @@ docker exec -it $OPENPOSE_CONTAINER_ID \
 # Kill the OpenPose Container
 docker kill $OPENPOSE_CONTAINER_ID
 docker container rm $OPENPOSE_CONTAINER_ID
+
+# Create a tar bundle of the output
+tar -czvf openpose_frames_keypoints.tar.gz $OUT_DIR/render $OUT_DIR/keypoints
+mv openpose_frames_keypoints.tar.gz $OUT_DIR

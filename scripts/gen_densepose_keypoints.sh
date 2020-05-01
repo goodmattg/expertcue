@@ -21,13 +21,11 @@ nvidia-docker run -d \
   --runtime=nvidia \
   --mount type=bind,source=$PWD/$IN_DIR,target=/data \
   --mount type=bind,source=$PWD/$OUT_DIR,target=/out \
-  exsidius/openpose:openpose
+  densepose:c2-cuda9-cudnn7-wtsdata2
 
 # OpenPose container must be named 'pose' for this to work
-OPENPOSE_CONTAINER_ID=$(docker ps -aqf "name=dense")
-echo "Spun up DensePose: $OPENPOSE_CONTAINER_ID"
-
-
+DENSEPOSE_CONTAINER_ID=$(docker ps -aqf "name=dense")
+echo "Spun up DensePose: $DENSEPOSE_CONTAINER_ID"
 
 nvidia-docker run -v $DENSEPOSE/DensePoseData:/denseposedata -it densepose:c2-cuda9-cudnn7-wtsdata \
 python2 tools/infer.py \

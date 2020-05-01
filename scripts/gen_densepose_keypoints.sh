@@ -21,6 +21,7 @@ nvidia-docker run -d \
   --runtime=nvidia \
   --mount type=bind,source=$PWD/$IN_DIR,target=/data \
   --mount type=bind,source=$PWD/$OUT_DIR,target=/out \
+  --mount type=bind,source=$PWD/models/densepose_pretrained,target=/densepose/wts
   garyfeng/densepose:latest
 
   # densepose:c2-cuda9-cudnn7-wtsdata2

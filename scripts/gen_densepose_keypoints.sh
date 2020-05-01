@@ -20,8 +20,8 @@ nvidia-docker run -d \
   -e DISPLAY \
   --runtime=nvidia \
   --mount type=bind,source=$PWD/$IN_DIR,target=/data \
-  --mount type=bind,source=$PWD/$OUT_DIR,target=/out \  
-  garyfeng/denspose:latest
+  --mount type=bind,source=$PWD/$OUT_DIR,target=/out \
+  garyfeng/densepose:latest
 
   # densepose:c2-cuda9-cudnn7-wtsdata2
 
@@ -29,7 +29,7 @@ nvidia-docker run -d \
 DENSEPOSE_CONTAINER_ID=$(docker ps -aqf "name=dense")
 echo "Spun up DensePose: $DENSEPOSE_CONTAINER_ID"
 
-nvidia-docker exec -it $OPENPOSE_CONTAINER_ID \
+nvidia-docker exec -it $DENSEPOSE_CONTAINER_ID \
   python2 tools/infer.py \
       --im $IN_DIR/frame_000001.png \
       --output-dir $OUT_DIR/render \

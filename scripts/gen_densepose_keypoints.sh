@@ -32,9 +32,12 @@ echo "Spun up DensePose: $DENSEPOSE_CONTAINER_ID"
 
 nvidia-docker exec -it $DENSEPOSE_CONTAINER_ID \
   python2 tools/infer.py \
-      --im $IN_DIR/frame_000001.png \
-      --output-dir $OUT_DIR/render \
+      --im /data/frame_000001.png \
+      --output-dir /out/render \
       wts/DensePose_ResNet101_FPN_s1x-e2e.pkl configs/DensePose_ResNet101_FPN_s1x-e2e.yaml
+
+nvidia-docker exec -it $DENSEPOSE_CONTAINER_ID \
+  mv /densepose/test_vis.pkl /out/render
       
 # Kill the OpenPose Container
 docker kill $DENSEPOSE_CONTAINER_ID

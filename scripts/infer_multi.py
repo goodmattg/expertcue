@@ -27,7 +27,7 @@ import numpy as np
 import pickle
 
 from os import listdir
-from os.path import isfile, join
+from os.path import isfile, join, splitext, basename, exists
 
 from caffe2.python import workspace
 
@@ -117,7 +117,7 @@ def main(args):
     im_files = [
         f
         for f in listdir(args.im_folder)
-        if isfile(join(args.im_folder, f) and f.endswith(".png"))
+        if isfile(join(args.im_folder, f)) and (f.endswith(".png") or f.endswith(".jpg"))
     ]
 
     for im_file in im_files:
@@ -158,14 +158,13 @@ def main(args):
 
             workspace.ResetWorkspace()
 
-        out_name = os.path.join(
-            args.output_dir, "render", "{}".format(os.path.basename(im_file) + ".pdf")
+        out_name = join(
+            args.output_dir, "render", "{}".format(splitext(basename(im_file))[0] + ".pdf")
         )
         logger.info("Processing {} -> {}".format(im_file, out_name))
 
-
-        out_pkl = os.path.join(
-            args.output_dir, "annotations", "{}".format(os.path.basename(im_file) + ".pkl")
+        out_pkl = join(
+            args.output_dir, "annotations", "{}".format(splitext(basename(im_file))[0] + ".pkl")
         )
         f = open(out_pkl", "w")
         pickle.dump(
@@ -182,7 +181,7 @@ def main(args):
         vis_utils.vis_one_image(
             im[:, :, ::-1],
             im_file,
-            args.output_dir,
+            join(args.output_dir, "render"),
             cls_boxes,
             cls_segms,
             cls_keyps,
@@ -201,8 +200,8 @@ def check_args(args):
     )
     if args.rpn_pkl is not None:
         args.rpn_pkl = cache_url(args.rpn_pkl, cfg.DOWNLOAD_CACHE)
-        assert os.path.exists(args.rpn_pkl)
-        assert os.path.exists(args.rpn_cfg)
+        assert exists(args.rpn_pkl)
+        assert exists(args.rpn_cfg)
     if args.models_to_run is not None:
         assert len(args.models_to_run) % 2 == 0
         for i, model_file in enumerate(args.models_to_run):
@@ -210,7 +209,7 @@ def check_args(args):
                 if i % 2 == 0:
                     model_file = cache_url(model_file, cfg.DOWNLOAD_CACHE)
                     args.models_to_run[i] = model_file
-                assert os.path.exists(model_file), "'{}' does not exist".format(
+                assert exists(model_file), "'{}' does not exist".format(
                     model_file
                 )
 

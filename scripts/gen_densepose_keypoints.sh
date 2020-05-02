@@ -12,7 +12,7 @@ echo "Output directory: $PWD/$OUT_DIR"
 mkdir -p $OUT_DIR/render
 mkdir -p $OUT_DIR/keypoints
 
-# Spin up OpenPose container named 'pose'
+# Spin up DensePose container named 'dense'
 nvidia-docker run -d \
   -it \
   --name dense \
@@ -24,20 +24,24 @@ nvidia-docker run -d \
   --mount type=bind,source=$PWD/models/densepose_pretrained,target=/densepose/wts \
   garyfeng/densepose:latest
 
-  # densepose:c2-cuda9-cudnn7-wtsdata2
-
-# OpenPose container must be named 'pose' for this to work
+# DensePose container must be named 'dense' for this to work
 DENSEPOSE_CONTAINER_ID=$(docker ps -aqf "name=dense")
 echo "Spun up DensePose: $DENSEPOSE_CONTAINER_ID"
 
+# FIXME: This should work for multiple images.
 nvidia-docker exec -it $DENSEPOSE_CONTAINER_ID \
   python2 tools/infer.py \
       --im /data/frame_000001.png \
       --output-dir /out/render \
-      wts/DensePose_ResNet101_FPN_s1x-e2e.pkl configs/DensePose_ResNet101_FPN_s1x-e2e.yaml
+      wts/DensePoseKeyPointsMask_ResNet50_FPN_s1x-e2e.pkl configs/DensePoseKeyPointsMask_ResNet50_FPN_s1x-e2e.yaml
+      # wts/DensePose_ResNet101_FPN_s1x-e2e.pkl configs/DensePose_ResNet101_FPN_s1x-e2e.yaml
 
+# TODO: Check that this actually works
 nvidia-docker exec -it $DENSEPOSE_CONTAINER_ID \
-  mv /densepose/test_vis.pkl /out/render
+  mv /densepose/test_vis.pkl /out/render ; \
+  mv /out/render/test_vis.pkl /out/render/frame_000001_annot.pkl
+
+https://github.com/facebookresearch/DensePose/blob/master/MODEL_ZOO.md  
       
 # Kill the OpenPose Container
 docker kill $DENSEPOSE_CONTAINER_ID

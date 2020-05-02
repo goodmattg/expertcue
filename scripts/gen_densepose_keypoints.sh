@@ -10,7 +10,7 @@ echo "Frame directory: $PWD/$IN_DIR"
 echo "Output directory: $PWD/$OUT_DIR"
 
 mkdir -p $OUT_DIR/render
-mkdir -p $OUT_DIR/keypoints
+mkdir -p $OUT_DIR/annotations
 
 # Spin up DensePose container named 'dense'
 nvidia-docker run -d \
@@ -30,18 +30,18 @@ echo "Spun up DensePose: $DENSEPOSE_CONTAINER_ID"
 
 # FIXME: This should work for multiple images.
 nvidia-docker exec -it $DENSEPOSE_CONTAINER_ID \
-  python2 tools/infer.py \
-      --im /data/frame_000001.png \
-      --output-dir /out/render \
+  python2 tools/infer_multi.py \
+      --im-dir /data \
+      --output-dir /out \
       wts/DensePoseKeyPointsMask_ResNet50_FPN_s1x-e2e.pkl configs/DensePoseKeyPointsMask_ResNet50_FPN_s1x-e2e.yaml
       # wts/DensePose_ResNet101_FPN_s1x-e2e.pkl configs/DensePose_ResNet101_FPN_s1x-e2e.yaml
 
-# TODO: Check that this actually works
-nvidia-docker exec -it $DENSEPOSE_CONTAINER_ID \
-  mv /densepose/test_vis.pkl /out/render ; \
-  mv /out/render/test_vis.pkl /out/render/frame_000001_annot.pkl
+# # TODO: Check that this actually works
+# nvidia-docker exec -it $DENSEPOSE_CONTAINER_ID \
+#   mv /densepose/test_vis.pkl /out/render ; \
+#   mv /out/render/test_vis.pkl /out/render/frame_000001_annot.pkl
 
-https://github.com/facebookresearch/DensePose/blob/master/MODEL_ZOO.md  
+# https://github.com/facebookresearch/DensePose/blob/master/MODEL_ZOO.md  
       
 # Kill the OpenPose Container
 docker kill $DENSEPOSE_CONTAINER_ID

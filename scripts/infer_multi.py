@@ -117,7 +117,8 @@ def main(args):
     im_files = [
         f
         for f in listdir(args.im_folder)
-        if isfile(join(args.im_folder, f)) and (f.endswith(".png") or f.endswith(".jpg"))
+        if isfile(join(args.im_folder, f))
+        and (f.endswith(".png") or f.endswith(".jpg"))
     ]
 
     for im_file in im_files:
@@ -159,20 +160,24 @@ def main(args):
             workspace.ResetWorkspace()
 
         out_name = join(
-            args.output_dir, "render", "{}".format(splitext(basename(im_file))[0] + ".pdf")
+            args.output_dir,
+            "render",
+            "{}".format(splitext(basename(im_file))[0] + ".pdf"),
         )
         logger.info("Processing {} -> {}".format(im_file, out_name))
 
         out_pkl = join(
-            args.output_dir, "annotations", "{}".format(splitext(basename(im_file))[0] + ".pkl")
+            args.output_dir,
+            "annotations",
+            "{}".format(splitext(basename(im_file))[0] + ".pkl"),
         )
-        f = open(out_pkl", "w")
+        f = open(out_pkl, "w")
         pickle.dump(
             {
                 "im": im,
                 "cls_boxes": np.array(cls_boxes),
                 "cls_keyps": np.array(cls_keyps),
-                "cls_segms": np.array(cls_segms)
+                "cls_segms": np.array(cls_segms),
             },
             f,
         )
@@ -209,9 +214,7 @@ def check_args(args):
                 if i % 2 == 0:
                     model_file = cache_url(model_file, cfg.DOWNLOAD_CACHE)
                     args.models_to_run[i] = model_file
-                assert exists(model_file), "'{}' does not exist".format(
-                    model_file
-                )
+                assert exists(model_file), "'{}' does not exist".format(model_file)
 
 
 if __name__ == "__main__":

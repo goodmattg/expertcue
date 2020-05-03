@@ -6,6 +6,7 @@ trap 'echo "\"${last_command}\" command filed with exit code $?."' EXIT
 
 IN_DIR=$1
 OUT_DIR=$2
+CUE_DIR=$3
 echo "Frame directory: $PWD/$IN_DIR"
 echo "Output directory: $PWD/$OUT_DIR"
 
@@ -25,7 +26,7 @@ nvidia-docker run -d \
   garyfeng/densepose:latest
 
 # We need the multi-image inference file
-docker cp infer_multi.py dense:/densepose/tools/infer_multi.py
+docker cp /home/goodmanm/expertcue/scripts/infer_multi.py dense:/densepose/tools/infer_multi.py
 
 # DensePose container must be named 'dense' for this to work
 DENSEPOSE_CONTAINER_ID=$(docker ps -aqf "name=dense")

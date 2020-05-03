@@ -121,6 +121,8 @@ def main(args):
         and (f.endswith(".png") or f.endswith(".jpg"))
     ]
 
+    logger.info("Found {} image files".format(len(im_files)))
+
     for im_file in im_files:
 
         im = cv2.imread(im_file)

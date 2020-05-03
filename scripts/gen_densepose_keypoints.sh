@@ -32,7 +32,6 @@ docker cp /home/goodmanm/expertcue/scripts/infer_multi.py dense:/densepose/tools
 DENSEPOSE_CONTAINER_ID=$(docker ps -aqf "name=dense")
 echo "Spun up DensePose: $DENSEPOSE_CONTAINER_ID"
 
-# FIXME: This should work for multiple images.
 nvidia-docker exec -it $DENSEPOSE_CONTAINER_ID \
   python2 tools/infer_multi.py \
       --im-dir /data \
@@ -40,13 +39,10 @@ nvidia-docker exec -it $DENSEPOSE_CONTAINER_ID \
       wts/DensePoseKeyPointsMask_ResNet50_FPN_s1x-e2e.pkl configs/DensePoseKeyPointsMask_ResNet50_FPN_s1x-e2e.yaml
       # wts/DensePose_ResNet101_FPN_s1x-e2e.pkl configs/DensePose_ResNet101_FPN_s1x-e2e.yaml
 
-# # TODO: Check that this actually works
-# nvidia-docker exec -it $DENSEPOSE_CONTAINER_ID \
-#   mv /densepose/test_vis.pkl /out/render ; \
-#   mv /out/render/test_vis.pkl /out/render/frame_000001_annot.pkl
-
 # https://github.com/facebookresearch/DensePose/blob/master/MODEL_ZOO.md  
       
 # Kill the OpenPose Container
 docker kill $DENSEPOSE_CONTAINER_ID
-docker container rm $DENSEPOSE_CONTAINER_ID    
+docker container rm $DENSEPOSE_CONTAINER_ID
+
+# TODO: Add auto-zip

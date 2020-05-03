@@ -115,7 +115,7 @@ def main(args):
     cfg_orig = load_cfg(yaml.dump(cfg))
 
     im_files = [
-        f
+        join(args.im_folder, f)
         for f in listdir(args.im_folder)
         if isfile(join(args.im_folder, f))
         and (f.endswith(".png") or f.endswith(".jpg"))

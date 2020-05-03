@@ -24,6 +24,9 @@ nvidia-docker run -d \
   --mount type=bind,source=$PWD/models/densepose_pretrained,target=/densepose/wts \
   garyfeng/densepose:latest
 
+# We need the multi-image inference file
+docker cp infer_multi.py dense:/densepose/tools/infer_multi.py
+
 # DensePose container must be named 'dense' for this to work
 DENSEPOSE_CONTAINER_ID=$(docker ps -aqf "name=dense")
 echo "Spun up DensePose: $DENSEPOSE_CONTAINER_ID"

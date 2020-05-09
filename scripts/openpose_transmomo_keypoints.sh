@@ -7,6 +7,7 @@ trap 'echo "\"${last_command}\" command filed with exit code $?."' EXIT
 IN_VIDEO_PATH=$1
 IN_VIDEO=$(basename $IN_VIDEO_PATH)
 OUT_PATH=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+OUT_KEYPOINT_NPY=${IN_VIDEO%.*}.npy
 
 echo "Generating keypoints for: $IN_VIDEO"
 echo "Temporarory store for keypoints: $OUT_PATH"
@@ -41,7 +42,14 @@ docker exec -it $OPENPOSE_CONTAINER_ID \
 docker kill $OPENPOSE_CONTAINER_ID
 docker container rm $OPENPOSE_CONTAINER_ID
 
-# Python keypoint aggregation script will go here
+# Bundle OpenPose keypoints to TransMoMom format (15, 2, seq_length) .npy file
+python scripts/bundle_openpose.py \
+  --keypoint-dir $PWD/$OUT_PATH \
+  --output-fname $OUT_KEYPOINT_NPY
+
+mv $PWD/$OUT_PATH/$OUT_KEYPOINT_NPY .
+rm -rf $PWD/$OUT_PATH
+
 
 # # Create a tar bundle of the output
 # tar -czvf openpose_frames_keypoints.tar.gz $OUT_DIR/render $OUT_DIR/keypoints

@@ -6,8 +6,12 @@ trap 'echo "\"${last_command}\" command filed with exit code $?."' EXIT
 
 IN_VIDEO_PATH=$1
 IN_VIDEO=$(basename $IN_VIDEO_PATH)
+OUT_PATH=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
 
 echo "Generating keypoints for: $IN_VIDEO"
+echo "Temporarory store for keypoints: $OUT_PATH"
+
+mkdir $PWD/$OUT_PATH
 
 # Spin up OpenPose container named 'pose'
 docker run -d \
@@ -16,6 +20,7 @@ docker run -d \
   --net=host \
   -e DISPLAY \
   --runtime=nvidia \
+  --mount type=bind,source=$PWD/$OUT_PATH,target=/out \
   exsidius/openpose:openpose
 
 docker cp $IN_VIDEO_PATH pose:/$IN_VIDEO
@@ -30,11 +35,13 @@ docker exec -it $OPENPOSE_CONTAINER_ID \
     --model_pose BODY_25 \
     --display 0 \
     --render_pose 0 \
-    --write_json /
+    --write_json /out
 
 # Kill the OpenPose Container
-# docker kill $OPENPOSE_CONTAINER_ID
-# docker container rm $OPENPOSE_CONTAINER_ID
+docker kill $OPENPOSE_CONTAINER_ID
+docker container rm $OPENPOSE_CONTAINER_ID
+
+# Python keypoint aggregation script will go here
 
 # # Create a tar bundle of the output
 # tar -czvf openpose_frames_keypoints.tar.gz $OUT_DIR/render $OUT_DIR/keypoints

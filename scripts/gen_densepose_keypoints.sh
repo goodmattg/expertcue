@@ -26,7 +26,7 @@ nvidia-docker run -d \
   garyfeng/densepose:latest
 
 # We need the multi-image inference file
-docker cp /home/goodmanm/expertcue/scripts/infer_multi.py dense:/densepose/tools/infer_multi.py
+docker cp /home/goodmanm/expertcue/scripts/densepose_infer_multi.py dense:/densepose/tools/infer_multi.py
 
 # DensePose container must be named 'dense' for this to work
 DENSEPOSE_CONTAINER_ID=$(docker ps -aqf "name=dense")

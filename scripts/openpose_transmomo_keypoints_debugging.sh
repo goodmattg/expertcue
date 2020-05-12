@@ -36,6 +36,7 @@ docker exec -it $OPENPOSE_CONTAINER_ID \
     ./build/examples/openpose/openpose.bin \
     --video /$IN_VIDEO \
     --model_pose BODY_25 \
+    --display 0 \
     --write_video /out/$OUT_KEYPOINT_AVI \
     --write_json /out
 
@@ -48,6 +49,6 @@ python scripts/bundle_openpose.py \
   --keypoint-dir $PWD/$OUT_PATH \
   --output-fname $OUT_KEYPOINT_NPY
 
-mv $PWD/$OUT_PATH/$OUT_KEYPOINT_NPY .
-mv $PWD/$OUT_PATH/$OUT_KEYPOINT_AVI .
-rm -rf $PWD/$OUT_PATH
+# mv $PWD/$OUT_PATH/$OUT_KEYPOINT_NPY .
+# mv $PWD/$OUT_PATH/$OUT_KEYPOINT_AVI .
+# rm -rf $PWD/$OUT_PATH

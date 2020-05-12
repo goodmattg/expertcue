@@ -12,11 +12,12 @@ from operator import itemgetter
 TRANSMOMO_KEYPOINT_STOP = 15
 # Keypoints are (x,y)
 KEYPOINT_DIM = 2
-# Keypoint file regex. OpenPose automatically append _keypoints to json output
-KEYPOINT_REGEX = "[a-zA-Z0-9]+_([0-9]+)_[a-zA-Z0-9]+.json"
 
 
 def bundle_keypoints(args):
+    pdb.set_trace()
+    # Keypoint file regex. OpenPose automatically append _keypoints to json output
+    KEYPOINT_REGEX = "{}_([0-9]+)_[a-zA-Z0-9]+.json".format(args.keypoint_base)
 
     kp_files = [
         f
@@ -63,8 +64,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Bundle OpenPose keypoint files")
 
     # fmt: off
-    parser.add_argument("--keypoint-dir", dest="keypoint_dir", default=None, type=str)
-    parser.add_argument("--output-fname", dest="output_fname", default=None, type=str)
+    parser.add_argument("--keypoint-dir", dest="keypoint_dir", required=True, default=None, type=str)
+    parser.add_argument("--keypoint-base", dest="keypoint_base", required=True, default=None, type=str)
+    parser.add_argument("--output-fname", dest="output_fname", required=True, default=None, type=str)
     # fmt: on
     args = parser.parse_args()
 

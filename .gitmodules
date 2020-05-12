@@ -1,0 +1,3 @@
+[submodule "transmomo.pytorch"]
+	path = transmomo.pytorch
+	url = https://github.com/goodmattg/transmomo.pytorch

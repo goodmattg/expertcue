@@ -1,7 +1,7 @@
 import argparse
 import json
 import os
-import pdb
+import re
 
 import numpy as np
 
@@ -13,15 +13,33 @@ KEYPOINT_DIM = 2
 
 def bundle_keypoints(args):
 
+    # Keypoint file regex. OpenPose automatically append "_keypoints.json" to frame number
+    KEYPOINT_REGEX = "{}_([0-9]+)_[a-zA-Z0-9]+.json".format(args.keypoint_base)
+
     kp_files = [
-        os.path.join(args.keypoint_dir, f)
+        f
         for f in os.listdir(args.keypoint_dir)
-        if os.path.isfile(os.path.join(args.keypoint_dir, f)) and f.endswith(".json")
+        if os.path.isfile(os.path.join(args.keypoint_dir, f))
+        and re.match(KEYPOINT_REGEX, f) is not None
     ]
 
-    kp_matrix = np.empty((TRANSMOMO_KEYPOINT_STOP, KEYPOINT_DIM, len(kp_files)))
+    sorted_files = [
+        tup[1]
+        for tup in sorted(
+            [
+                (
+                    int(re.match(KEYPOINT_REGEX, f).group(1)),
+                    os.path.join(args.keypoint_dir, f),
+                )
+                for f in kp_files
+            ],
+            key=lambda tup: tup[0],
+        )
+    ]
 
-    for f_index, kpf in enumerate(kp_files):
+    kp_matrix = np.empty((TRANSMOMO_KEYPOINT_STOP, KEYPOINT_DIM, len(sorted_files)))
+
+    for f_index, kpf in enumerate(sorted_files):
         with open(kpf) as f:
             payload = json.load(f)
 
@@ -42,9 +60,11 @@ if __name__ == "__main__":
     # Input folder path
     parser = argparse.ArgumentParser(description="Bundle OpenPose keypoint files")
 
-    parser.add_argument("--keypoint-dir", dest="keypoint_dir", default=None, type=str)
-    parser.add_argument("--output-fname", dest="output_fname", default=None, type=str)
-
+    # fmt: off
+    parser.add_argument("--keypoint-dir", dest="keypoint_dir", required=True, default=None, type=str)
+    parser.add_argument("--keypoint-base", dest="keypoint_base", required=True, default=None, type=str)
+    parser.add_argument("--output-fname", dest="output_fname", required=True, default=None, type=str)
+    # fmt: on
     args = parser.parse_args()
 
     bundle_keypoints(args)

@@ -1,33 +1,63 @@
 import argparse
 import numpy as np
+import os
+import sys
+import traceback
 
 from transmomo.lib.util.visualization import motion2video, motion2video_np, hex2rgb
 
 
+def parse_args():
+    # fmt: off
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("input_fname", default=None, type=str)
+
+    parser.add_argument("--source-height", dest="source_height", required=True, type=int, help="source height")
+    parser.add_argument("--source-width", dest="source_width", required=True, type=int, help="source width")
+
+    parser.add_argument("--output-fname", dest="output_fname", type=str, default=None, help="output video filename")
+
+    parser.add_argument("--color", type=str, default="#a50b69#b73b87#db9dc3", help="skeleton render color")
+
+    # fmt: on
+    args = parser.parse_args()
+    return args
+
+
 def render_keypoints(args):
 
-    # color = "#a50b69#b73b87#db9dc3"
-    # color = np.array(hex2rgb(color))
-    # print(color)
+    try:
+        with open(args.input_fname, "rb") as f:
 
-    # with open(args.input_fname, "rb") as f:
-    #     motion = np.load(f)
+            motion = np.load(f)
 
-    #     motion2video(motion, 512, 512, "blah.mp4", np.array([0.5, 0.5, 0.5]))
-    return
+            color = np.array(hex2rgb(args.color))
+
+            output_fname = (
+                args.output_fname
+                if args.output_fname
+                else "{}_mx.mp4".format(
+                    os.path.splitext(os.path.basename(args.input_fname))[0]
+                )
+            )
+
+            motion2video(
+                motion,
+                args.source_height,
+                args.source_width,
+                output_fname,
+                color,
+                transparency=False,
+                show_progress=True,
+            )
+    except:
+        print("Unable to render keypoint motion as video!")
+        typ, value, tb = sys.exc_info()
+        traceback.print_exc()
 
 
 if __name__ == "__main__":
 
-    print(__name__)
-
-    # Input folder path
-    parser = argparse.ArgumentParser(
-        description="Render OpenPose keypoints in TransMoMo format"
-    )
-
-    parser.add_argument("--input-fname", dest="input_fname", default=None, type=str)
-
-    args = parser.parse_args()
-
+    args = parse_args()
     render_keypoints(args)

@@ -7,8 +7,10 @@ trap 'echo "\"${last_command}\" command filed with exit code $?."' EXIT
 IN_VIDEO_PATH=$1
 IN_VIDEO=$(basename $IN_VIDEO_PATH)
 OUT_PATH=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
-OUT_KEYPOINT_NPY=${IN_VIDEO%.*}.npy
-OUT_KEYPOINT_AVI=${IN_VIDEO%.*}_kp.avi
+
+OUT_BASENAME=${IN_VIDEO%.*}
+OUT_KEYPOINT_NPY=${OUT_BASENAME}.npy
+OUT_KEYPOINT_AVI=${OUT_BASENAME}_kp.avi
 
 echo "Generating keypoints for: $IN_VIDEO"
 echo "Temporarory store for keypoints: $OUT_PATH"

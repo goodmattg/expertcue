@@ -1,12 +1,9 @@
 import argparse
 import json
 import os
-import pdb
 import re
 
 import numpy as np
-
-from operator import itemgetter
 
 # TransMoMo only uses the first 15 keypoints on BODYPOSE_25
 TRANSMOMO_KEYPOINT_STOP = 15
@@ -15,8 +12,8 @@ KEYPOINT_DIM = 2
 
 
 def bundle_keypoints(args):
-    pdb.set_trace()
-    # Keypoint file regex. OpenPose automatically append _keypoints to json output
+
+    # Keypoint file regex. OpenPose automatically append "_keypoints.json" to frame number
     KEYPOINT_REGEX = "{}_([0-9]+)_[a-zA-Z0-9]+.json".format(args.keypoint_base)
 
     kp_files = [

@@ -5,6 +5,7 @@ __pycache__/
 
 # Model checkpoints
 *.pt
+*.pth
 *.ckpt
 
 # C extensions
@@ -96,6 +97,7 @@ ENV/
 # Rope project settings
 .ropeproject
 *.npy
+*.npz
 *.pkl
 
 # Development environment

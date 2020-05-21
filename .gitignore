@@ -58,6 +58,9 @@ coverage.xml
 *.log
 local_settings.py
 
+# TensorFlow logs
+*.events
+
 # Flask stuff:
 instance/
 .webassets-cache
@@ -96,9 +99,11 @@ ENV/
 
 # Rope project settings
 .ropeproject
+*.pkl
+
+# Python files
 *.npy
 *.npz
-*.pkl
 
 # Development environment
 *.code-workspace

@@ -22,9 +22,11 @@ class Encoder(nn.Module):
 
         for i in range(nr_layer):
             if convpool is None:
+                # FIXME: So here in the static motion encoder, we want to not compress the temporal dimension
                 pad = (kernel_size - 2) // 2
                 model.append(nn.ReflectionPad1d(pad))
                 model.append(
+                    # NOTE: Changed the stride to 1 to stop compressing temporal
                     nn.Conv1d(
                         channels[i], channels[i + 1], kernel_size=kernel_size, stride=2
                     )
@@ -128,7 +130,6 @@ class AutoEncoder2x(nn.Module):
 
     def transfer(self, x1, x2):
         m1 = self.mot_encoder(x1)
-        pdb.set_trace()
         b2 = self.static_encoder(x2[:, :-2, :]).repeat(1, 1, m1.shape[-1])
 
         out12 = self.decoder(torch.cat([m1, b2], dim=1))
@@ -136,6 +137,8 @@ class AutoEncoder2x(nn.Module):
         return out12
 
     def cross_with_triplet(self, x1, x2, x12, x21):
+        pdb.set_trace()
+
         m1 = self.mot_encoder(x1)
         b1 = self.static_encoder(x1[:, :-2, :])
         m2 = self.mot_encoder(x2)

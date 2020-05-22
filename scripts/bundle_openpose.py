@@ -39,6 +39,9 @@ def bundle_keypoints(args):
 
     kp_matrix = np.empty((TRANSMOMO_KEYPOINT_STOP, KEYPOINT_DIM, len(sorted_files)))
 
+    # FIXME: This doesn't handle missing joint positions the same way LCM/TransMoMo do.
+    # Use previous last available frame joint to fill in missing joints
+
     for f_index, kpf in enumerate(sorted_files):
         with open(kpf) as f:
             payload = json.load(f)

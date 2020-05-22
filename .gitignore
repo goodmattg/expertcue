@@ -5,6 +5,7 @@ __pycache__/
 
 # Model checkpoints
 *.pt
+*.pth
 *.ckpt
 
 # C extensions
@@ -57,6 +58,9 @@ coverage.xml
 *.log
 local_settings.py
 
+# TensorFlow logs
+*.events
+
 # Flask stuff:
 instance/
 .webassets-cache
@@ -95,8 +99,11 @@ ENV/
 
 # Rope project settings
 .ropeproject
-*.npy
 *.pkl
+
+# Python files
+*.npy
+*.npz
 
 # Development environment
 *.code-workspace

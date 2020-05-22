@@ -11,7 +11,7 @@ import pdb
 
 class Encoder(nn.Module):
     def __init__(
-        self, channels, kernel_size=8, global_pool=None, convpool=None, compress=False
+        self, channels, kernel_size=7, global_pool=None, convpool=None, compress=False
     ):
         super(Encoder, self).__init__()
 
@@ -23,12 +23,12 @@ class Encoder(nn.Module):
         for i in range(nr_layer):
             if convpool is None:
                 # FIXME: So here in the static motion encoder, we want to not compress the temporal dimension
-                pad = (kernel_size - 2) // 2
+                pad = (kernel_size) // 2
                 model.append(nn.ReflectionPad1d(pad))
                 model.append(
                     # NOTE: Changed the stride to 1 to stop compressing temporal
                     nn.Conv1d(
-                        channels[i], channels[i + 1], kernel_size=kernel_size, stride=2
+                        channels[i], channels[i + 1], kernel_size=kernel_size, stride=1
                     )
                 )
                 model.append(acti)
@@ -70,7 +70,8 @@ class Decoder(nn.Module):
         acti = nn.LeakyReLU(0.2)
 
         for i in range(len(channels) - 1):
-            model.append(nn.Upsample(scale_factor=2, mode="nearest"))
+            # NOTE: Removed to keep encoder/decoder symmetric for no temporal compression
+            # model.append(nn.Upsample(scale_factor=2, mode="nearest"))
             model.append(nn.ReflectionPad1d(pad))
             model.append(
                 nn.Conv1d(
@@ -137,8 +138,6 @@ class AutoEncoder2x(nn.Module):
         return out12
 
     def cross_with_triplet(self, x1, x2, x12, x21):
-        pdb.set_trace()
-
         m1 = self.mot_encoder(x1)
         b1 = self.static_encoder(x1[:, :-2, :])
         m2 = self.mot_encoder(x2)

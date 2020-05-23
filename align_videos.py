@@ -6,6 +6,7 @@ import traceback
 import torch
 import pdb
 import dtw
+import imageio
 
 from scipy.spatial.distance import cdist
 from utils.filesystem import path_exist
@@ -116,6 +117,8 @@ def video_dtw(args, config):
         # Dead-simple Euclidean cost matrix in the motion embedding (static appearance agnostic)
         cost = cdist(z1, z2, metric="euclidean")
         alignment = dtw.dtw(x=cost, keep_internals=True)
+
+        #
 
         pdb.set_trace()
 

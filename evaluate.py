@@ -40,11 +40,11 @@ def handle2x(config, args):
     mean_pose, std_pose = get_meanpose(config)
 
     # get input
-    dataloder = get_dataloader("test", config)
+    dataloader = get_dataloader("test", config)
     v1 = VIEW_ANGLES[args.view1] if args.view1 is not None else None
     v2 = VIEW_ANGLES[args.view2] if args.view2 is not None else None
-    input1 = dataloder.dataset.preprocessing(args.path1, v1).unsqueeze(0)
-    input2 = dataloder.dataset.preprocessing(args.path2, v2).unsqueeze(0)
+    input1 = dataloader.dataset.preprocessing(args.path1, v1).unsqueeze(0)
+    input2 = dataloader.dataset.preprocessing(args.path2, v2).unsqueeze(0)
     input1 = input1.to(config.device)
     input2 = input2.to(config.device)
 

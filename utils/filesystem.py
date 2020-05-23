@@ -5,6 +5,12 @@ import sys
 from functools import reduce
 
 
+def path_exist(path):
+    if os.path.isfile(path):
+        return os.path.exists(path)
+    else:
+        return os.path.isdir(path):
+
 def file_exists(prospective_file):
     """Check if the prospective file exists"""
     file_path = os.path.join(

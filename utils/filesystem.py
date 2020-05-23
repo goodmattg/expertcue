@@ -7,9 +7,16 @@ from functools import reduce
 
 def path_exist(path):
     if os.path.isfile(path):
-        return os.path.exists(path)
+        if os.path.exists(path):
+            return path
+        else:
+            raise argparse.ArgumentTypeError("File: '{0}' does not exist".format(path))
     else:
-        return os.path.isdir(path):
+        if os.path.isdir(path):
+            return path
+        else:
+            raise argparse.ArgumentTypeError("Path: '{0}' is invalid".format(path))
+
 
 def file_exists(prospective_file):
     """Check if the prospective file exists"""

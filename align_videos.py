@@ -3,10 +3,16 @@ import numpy as np
 import os
 import sys
 import traceback
+import torch
+import pdb
+import dtw
 
-from dtw import *
 from scipy.spatial.distance import cdist
 from utils.filesystem import path_exist
+from utils.core import pad_to_height
+
+from dataset import get_meanpose
+from model import get_autoencoder
 
 from utils.motion import (
     preprocess_motion2d,
@@ -43,6 +49,7 @@ def parse_args():
         "--v1-shape",
         nargs=2,
         metavar=("height", "width"),
+        type=int,
         required=True,
         help="video 1 shape: [H, W]",
     )
@@ -52,11 +59,14 @@ def parse_args():
         "--v2-shape",
         nargs=2,
         metavar=("height", "width"),
+        type=int,
         required=True,
         help="video 2 shape: [H, W]",
     )
 
-    parser.add_argument("--vid-npy", action="store_true", help="load OpenPose keypoints from [15, 2, T] numpy (.npy) matrix")    
+    parser.add_argument("--vid-npy", action="store_true", help="load OpenPose keypoints from [15, 2, T] numpy (.npy) matrix")
+
+    parser.add_argument('-g', '--gpu_ids', type=int, default=0, required=False)
     # fmt: on
     args = parser.parse_args()
 
@@ -69,13 +79,12 @@ def video_dtw(args, config):
 
     try:
 
+        # mean/std pose
+        mean_pose, std_pose = get_meanpose(config)
+
         # resize input
-        h1, w1, scale1 = pad_to_height(
-            config.img_size[0], args.img1_height, args.img1_width
-        )
-        h2, w2, scale2 = pad_to_height(
-            config.img_size[0], args.img2_height, args.img2_width
-        )
+        h1, w1, scale1 = pad_to_height(config.img_size[0], *args.v1_shape)
+        h2, w2, scale2 = pad_to_height(config.img_size[0], *args.v2_shape)
 
         if args.vid_npy:
             # Videos are *.npy matrix files
@@ -86,19 +95,29 @@ def video_dtw(args, config):
             input1 = openpose2motion(args.vid1, scale=scale1)
             input2 = openpose2motion(args.vid2, scale=scale2)
 
+        input1 = preprocess_motion2d(input1, mean_pose, std_pose)
+        input2 = preprocess_motion2d(input2, mean_pose, std_pose)
+        input1 = input1.to(config.device)
+        input2 = input2.to(config.device)
+
         # load trained model
         net = get_autoencoder(config)
         net.load_state_dict(torch.load(args.model_path))
         net.to(config.device)
         net.eval()
 
-        # mean/std pose
-        mean_pose, std_pose = get_meanpose(config)
+        with torch.no_grad():
+            z1, z2 = net.mot_encoder(input1), net.mot_encoder(input2)
+            z1, z2 = (
+                z1.squeeze(dim=0).detach().numpy().T,
+                z2.squeeze(dim=0).detach().numpy().T,
+            )
 
-        x1, x2 = args.vid1_bundle, args.vid2_bundle
-        # To do things...
-        cost = cdist(x1, x2, metric="euclidean")
-        alignment = dtw(x=cost, keep_internals=True)
+        # Dead-simple Euclidean cost matrix in the motion embedding (static appearance agnostic)
+        cost = cdist(z1, z2, metric="euclidean")
+        alignment = dtw.dtw(x=cost, keep_internals=True)
+
+        pdb.set_trace()
 
     except:
         print("Unable to render keypoint motion as video!")

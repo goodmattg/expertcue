@@ -135,7 +135,7 @@ def video_dtw(args, config):
             vid1 = load_video_frames_to_npy(args.vid1)
             vid2 = load_video_frames_to_npy(args.vid2)
 
-            align_and_split_screen(vid1, vid2, alignment)
+            save_video_to_file(align_and_split_screen(vid1, vid2, alignment), "dtw.mp4")
 
     except:
         print("Unable to render keypoint motion as video!")

@@ -39,6 +39,7 @@ docker exec -it $OPENPOSE_CONTAINER_ID \
     --video /$IN_VIDEO \
     --model_pose BODY_25 \
     --display 0 \
+    --render_pose 0 \
     --write_video /out/$OUT_KEYPOINT_AVI \
     --write_json /out \
     --write_images /out

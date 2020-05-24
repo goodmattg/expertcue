@@ -8,6 +8,7 @@ import numpy as np
 import json
 import os
 import torch
+import pdb
 
 
 def trans_motion3d(motion3d, local3d=None, unit=128):
@@ -151,10 +152,11 @@ def rotation_matrix_along_axis(x, angle):
 
 def prebundle_openpose_to_motion(fname, scale=1.0, smooth=True, max_frame=None):
     """Load a prebundled OpenPose motion (.npy) and scale"""
+
     with open(fname, "rb") as f:
         motion = np.load(f)
 
-    length = max_frame if max_frame is not None else motion.shape[-1] // 8 * 8
+    length = max_frame if max_frame is not None else motion.shape[-1]
 
     # Clip loaded motion to length
     motion = motion[:, :, :length]

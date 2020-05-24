@@ -7,6 +7,8 @@ __pycache__/
 *.pt
 *.pth
 *.ckpt
+examples/
+train_log/*
 
 # C extensions
 *.so

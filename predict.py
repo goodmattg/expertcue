@@ -278,10 +278,6 @@ def main():
 
     config.initialize(args)
 
-    import pdb
-
-    pdb.set_trace()
-
     if args.name == "full":
         handle3x(config, args)
     else:

@@ -16,7 +16,9 @@ echo "Generating keypoints for: $IN_VIDEO"
 echo "Temporarory store for keypoints: $OUT_PATH"
 echo "Saving keypoints to: $OUT_KEYPOINT_NPY"
 
-mkdir $PWD/$OUT_PATH
+mkdir -p $PWD/$OUT_PATH/keypoints
+mkdir -p $PWD/$OUT_PATH/frames
+
 
 # Spin up OpenPose container named 'pose'
 docker run -d \
@@ -39,8 +41,10 @@ docker exec -it $OPENPOSE_CONTAINER_ID \
     --video /$IN_VIDEO \
     --model_pose BODY_25 \
     --display 0 \
+    --render_pose 0 \
     --write_video /out/$OUT_KEYPOINT_AVI \
-    --write_json /out
+    --write_json /out/keypoints \
+    --write_images /out/frames
 
 # Kill and remove the OpenPose Container
 docker kill $OPENPOSE_CONTAINER_ID
@@ -48,8 +52,9 @@ docker container rm $OPENPOSE_CONTAINER_ID
 
 # Bundle OpenPose keypoints to TransMoMo format (15, 2, seq_length) .npy file
 python scripts/bundle_openpose.py \
-  --keypoint-dir $PWD/$OUT_PATH \
-  --output-fname $OUT_KEYPOINT_NPY
+  --keypoint-dir $PWD/$OUT_PATH/keypoints \
+  --keypoint-base $OUT_BASENAME \
+  --output-fname $PWD/$OUT_PATH/$OUT_KEYPOINT_NPY
 
 # mv $PWD/$OUT_PATH/$OUT_KEYPOINT_NPY .
 # mv $PWD/$OUT_PATH/$OUT_KEYPOINT_AVI .

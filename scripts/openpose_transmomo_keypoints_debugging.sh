@@ -54,7 +54,7 @@ docker container rm $OPENPOSE_CONTAINER_ID
 python scripts/bundle_openpose.py \
   --keypoint-dir $PWD/$OUT_PATH/keypoints \
   --keypoint-base $OUT_BASENAME \
-  --output-fname $OUT_KEYPOINT_NPY
+  --output-fname $PWD/$OUT_PATH/$OUT_KEYPOINT_NPY
 
 # mv $PWD/$OUT_PATH/$OUT_KEYPOINT_NPY .
 # mv $PWD/$OUT_PATH/$OUT_KEYPOINT_AVI .

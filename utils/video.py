@@ -5,23 +5,32 @@ import dtw
 import sys
 import traceback
 import pdb
+import os
 
 import numpy as np
 
 from utils.core import pad_to_height
 
 
-def load_video_to_npy(path: str) -> np.ndarray:
+def load_video_frames_to_npy(path: str) -> np.ndarray:
     """Loads a video into a numpy array: [T, height, width, channels]"""
     try:
-        probe = ffmpeg.probe(path)
+        # Temporary video file preserving exact frame numbers
+        (
+            ffmpeg
+            .input("{}/*.png".format(path), pattern_type='glob')
+            .output("tmp.mp4")
+            .run()
+        )
+
+        probe = ffmpeg.probe("tmp.mp4")
         video_stream = next((stream for stream in probe['streams'] if stream['codec_type'] == 'video'), None)
         width = int(video_stream['width'])
         height = int(video_stream['height'])
 
         out, _ = (
             ffmpeg
-            .input(path)
+            .input("tmp.mp4")
             .output("pipe:", format="rawvideo", pix_fmt="rgb24")
             .run(capture_stdout=True)
         )
@@ -30,6 +39,7 @@ def load_video_to_npy(path: str) -> np.ndarray:
             .frombuffer(out, np.uint8)
             .reshape([-1, height, width, 3])
         )
+        os.remove("tmp.mp4")
         return video
     
     except:

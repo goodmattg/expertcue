@@ -132,8 +132,8 @@ def video_dtw(args, config):
 
         # Optional split-screen video view
         if args.vid1 and args.vid2:
-            vid1 = load_video_to_npy(args.vid1)
-            vid2 = load_video_to_npy(args.vid2)
+            vid1 = load_video_frames_to_npy(args.vid1)
+            vid2 = load_video_frames_to_npy(args.vid2)
 
             align_and_split_screen(vid1, vid2, alignment)
 

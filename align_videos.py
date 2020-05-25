@@ -126,16 +126,22 @@ def video_dtw(args, config):
 
         # Dead-simple Euclidean cost matrix in the motion embedding (static appearance agnostic)
         cost = cdist(z1, z2, metric="euclidean")
-        alignment = dtw.dtw(x=cost, keep_internals=True)
-
-        pdb.set_trace()
+        alignment = dtw.dtw(
+            x=cost,
+            step_pattern="asymmetric",
+            keep_internals=True,
+            open_begin=True,
+            open_end=True,
+        )
 
         # Optional split-screen video view
         if args.vid1 and args.vid2:
             vid1 = load_video_frames_to_npy(args.vid1)
             vid2 = load_video_frames_to_npy(args.vid2)
 
-            save_video_to_file(align_and_split_screen(vid1, vid2, alignment), "dtw.mp4")
+            save_video_to_file(
+                align_and_split_screen(vid1, vid2, alignment), "dtw2.mp4"
+            )
 
     except:
         print("Unable to render keypoint motion as video!")

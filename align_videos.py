@@ -7,6 +7,8 @@ import torch
 import pdb
 import dtw
 import imageio
+import random, string
+
 
 from scipy.spatial.distance import cdist
 from utils.filesystem import path_exist
@@ -70,6 +72,7 @@ def parse_args():
     parser.add_argument("--vid2", type=path_exist, default=None, help="Path to video2 for alignment viewing")
 
     parser.add_argument('-o', '--out_dir', type=path_exist, default="./outputs", help="output saving directory")
+    parser.add_argument("-ofn", "--out_fname", type=str, default=None, help="Output filename for generated video. Random otherwise")
     parser.add_argument('-g', '--gpu_ids', type=int, default=0, required=False)
     # fmt: on
     args = parser.parse_args()
@@ -139,9 +142,14 @@ def video_dtw(args, config):
             vid1 = load_video_frames_to_npy(args.vid1)
             vid2 = load_video_frames_to_npy(args.vid2)
 
-            save_video_to_file(
-                align_and_split_screen(vid1, vid2, alignment), "dtw2.mp4"
+            out_fname = (
+                args.out_fname
+                if args.out_fname
+                else "".join(random.choices(string.ascii_letters + string.digits, k=8))
+                + ".mp4"
             )
+
+            save_video_to_file(align_and_split_screen(vid1, vid2, alignment), out_fname)
 
     except:
         print("Unable to render keypoint motion as video!")

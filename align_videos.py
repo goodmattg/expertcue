@@ -8,6 +8,7 @@ import pdb
 import dtw
 import imageio
 import random, string
+import torchvision
 
 
 from scipy.spatial.distance import cdist
@@ -100,15 +101,6 @@ def video_dtw(args, config):
             for path, scale in [(args.vid1_kp, scale1), (args.vid2_kp, scale2)]
         ]
 
-        # if args.vid_npy:
-        #     # Videos are *.npy matrix files
-        #     input1 = prebundle_openpose_to_motion(args.vid1_kp, scale=scale1)
-        #     input2 = prebundle_openpose_to_motion(args.vid2_kp, scale=scale2)
-        # else:
-        #     # Videos are directories containing *.json files
-        #     input1 = openpose2motion(args.vid1_kp, scale=scale1)
-        #     input2 = openpose2motion(args.vid2_kp, scale=scale2)
-
         input1 = preprocess_motion2d(input1, mean_pose, std_pose)
         input2 = preprocess_motion2d(input2, mean_pose, std_pose)
         input1 = input1.to(config.device)
@@ -139,8 +131,13 @@ def video_dtw(args, config):
 
         # Optional split-screen video view
         if args.vid1 and args.vid2:
-            vid1 = load_video_frames_to_npy(args.vid1)
-            vid2 = load_video_frames_to_npy(args.vid2)
+
+            vid1, vid2 = [
+                load_video_frames_to_npy(path)
+                if os.path.isdir(path)
+                else load_video_to_npy(path)
+                for path in [args.vid1, args.vid2]
+            ]
 
             out_fname = (
                 args.out_fname
@@ -149,7 +146,10 @@ def video_dtw(args, config):
                 + ".mp4"
             )
 
-            save_video_to_file(align_and_split_screen(vid1, vid2, alignment), out_fname)
+            out_path = os.path.join(args.out_dir, out_fname)
+            print("Saving video to file: {}".format(out_fname))
+
+            write_video_to_file(align_and_split_screen(vid1, vid2, alignment), out_path)
 
     except:
         print("Unable to render keypoint motion as video!")

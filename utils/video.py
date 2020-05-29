@@ -6,11 +6,21 @@ import sys
 import traceback
 import pdb
 import os
+import torchvision
+import torch
 
 import numpy as np
 
 from utils.core import pad_to_height
 
+def load_video_to_npy(path: str) -> np.ndarray:
+    try:
+        vframes, _, _ = torchvision.io.read_video(path)
+        return vframes.numpy()
+    except: 
+        print("Unable to load video: {}".format(path))
+        typ, value, tb = sys.exc_info()
+        traceback.print_exc()        
 
 def load_video_frames_to_npy(path: str) -> np.ndarray:
     """Loads a video into a numpy array: [T, height, width, channels]"""
@@ -47,7 +57,10 @@ def load_video_frames_to_npy(path: str) -> np.ndarray:
         typ, value, tb = sys.exc_info()
         traceback.print_exc()
 
-def save_video_to_file(vid: np.ndarray, path: str, framerate=25, vcodec='libx264') -> None:
+def write_video_to_file(vid: np.ndarray, path: str, framerate=25, vcodec="libx264") -> None:
+    torchvision.io.write_video(path, torch.from_numpy(vid), framerate, video_codec=vcodec)
+
+def save_video_to_file(vid: np.ndarray, path: str, framerate=25, vcodec="libx264") -> None:
     """"""
     n, height, width, channels = vid.shape
     process = (

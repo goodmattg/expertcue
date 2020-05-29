@@ -103,7 +103,6 @@ def video_dtw(args, config):
 
         input1 = preprocess_motion2d(input1, mean_pose, std_pose)
         input2 = preprocess_motion2d(input2, mean_pose, std_pose)
-        input1 = input1.to(config.device)
         input2 = input2.to(config.device)
 
         # load trained model
@@ -113,6 +112,7 @@ def video_dtw(args, config):
         net.eval()
 
         with torch.no_grad():
+            # Autoencode motion
             z1, z2 = net.mot_encoder(input1), net.mot_encoder(input2)
             z1, z2 = (
                 z1.squeeze(dim=0).detach().numpy().T,
@@ -128,6 +128,8 @@ def video_dtw(args, config):
             open_begin=True,
             open_end=True,
         )
+
+        # TODO: Find repeated frames in aligned DTW path for input videos, replace with interpolated frames.
 
         # Optional split-screen video view
         if args.vid1 and args.vid2:

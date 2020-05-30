@@ -1,12 +1,48 @@
 import numpy as np
+import pdb
 
 from typing import List, Tuple
 
 
-def run_boundaries(run_starts: np.ndarray, run_lengths: np.ndarray):
-    assert len(run_starts) == len(run_lengths)
+def interpolate_fill(
+    boundaries: List[Tuple[int, int, List[int]]], array: np.ndarray
+) -> np.ndarray:
+    """
+    Fill duplicate duplicate indices with interpolated data
 
-    for start, length in zip(run_starts, run_lengths)
+    Input:
+        indices: index array
+        array: [N,...]
+    """
+    for s, e, idx in boundaries:
+        array[idx] = interpolate_linear(array[s], array[e], n=len(idx))
+
+    return array
+
+
+def interpolate_linear(x: np.ndarray, y: np.ndarray, n: int) -> np.ndarray:
+    return np.stack(
+        [np.linspace(xr, yr, n + 1, endpoint=False)[1:] for xr, yr in zip(x, y)], axis=1
+    )
+
+
+def run_boundaries(
+    run_starts: np.ndarray, run_lengths: np.ndarray
+) -> List[Tuple[int, int, List[int]]]:
+    """Returns run boundaries (left bound, right_bound, in_run)"""
+
+    assert len(run_starts) == len(run_lengths)
+    # Ignore the last index start b/c no right boundary)
+    boundaries = []
+    for ix in range(len(run_starts) - 1):
+        s, l = run_starts[ix], run_lengths[ix]
+        if l > 1:
+            boundaries.append(
+                (s, run_starts[ix + 1], list(range(s + 1, run_starts[ix + 1])))
+            )
+
+    return boundaries
+
 
 def find_runs(x: List[int]) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Find runs of consecutive items in an array.

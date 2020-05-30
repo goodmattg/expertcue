@@ -151,7 +151,11 @@ def video_dtw(args, config):
             out_path = os.path.join(args.out_dir, out_fname)
             print("Saving video to file: {}".format(out_fname))
 
-            write_video_to_file(align_and_split_screen(vid1, vid2, alignment), out_path)
+            write_video_to_file(
+                align_with_interp_fill(vid1, vid2, z1, z2, alignment), out_path
+            )
+
+            # write_video_to_file(align_and_split_screen(vid1, vid2, alignment), out_path)
 
     except:
         print("Unable to render keypoint motion as video!")

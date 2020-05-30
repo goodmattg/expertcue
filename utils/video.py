@@ -12,6 +12,7 @@ import torch
 import numpy as np
 
 from utils.core import pad_to_height
+from utils.align import interpolate_fill, find_runs, run_boundaries
 
 def load_video_to_npy(path: str) -> np.ndarray:
     try:
@@ -85,10 +86,6 @@ def save_video_to_file(vid: np.ndarray, path: str, framerate=25, vcodec="libx264
 def apply_alignment(vid: np.ndarray, index: np.ndarray) -> np.ndarray:
     """apply alignment vid1->vid2. [T, height, width, channels]"""
     return np.take(vid, index, axis=0)
-    # if vid1.shape[0] < vid2.shape[0]:
-    #     return np.take(vid1, align.index1, axis=0)
-    # else:
-    #     return np.take(vid2, align.index2, axis=0)
 
 def make_split_screen(vid1: np.ndarray, vid2: np.ndarray) -> np.ndarray:
     """Stack videos in a vertical split-screen view. [T, height, width, channels]"""
@@ -126,6 +123,20 @@ def align_and_split_screen(vid1: np.ndarray, vid2: np.ndarray, align: dtw.DTW) -
     vert_split = make_split_screen(vid_12, vid_21)
     return vert_split
 
-    # vid_aligned = apply_alignment(vid1, vid2, align)
+def align_with_interp_fill(vid1: np.ndarray, vid2: np.ndarray, mot1: np.ndarray, mot2: np.ndarray, align: dtw.DTW) -> np.ndarray:
 
-    # splitscreen = videos_to_split_screen()
+    # Videos with duplicated frames to create alignment
+    vid_12 = apply_alignment(vid1, align.index1) 
+    vid_21 = apply_alignment(vid2, align.index2) 
+
+
+    _, starts, lengths = find_runs(align.index2)
+    boundaries = run_boundaries(starts, lengths)
+
+    mot2 = interpolate_fill(boundaries, mot2)
+
+    for _, _, idx in boundaries:
+        # Go from interpolated motion embedding to skeleton image
+        # Replace video frame with skeleton
+
+    pass

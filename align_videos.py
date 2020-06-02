@@ -114,13 +114,13 @@ def video_dtw(args, config):
         with torch.no_grad():
             # Autoencode motion
             z1, z2 = net.mot_encoder(input1), net.mot_encoder(input2)
-            z1, z2 = (
-                z1.squeeze(dim=0).detach().numpy().T,
-                z2.squeeze(dim=0).detach().numpy().T,
-            )
 
         # Dead-simple Euclidean cost matrix in the motion embedding (static appearance agnostic)
-        cost = cdist(z1, z2, metric="euclidean")
+        cost = cdist(
+            z1.squeeze(dim=0).detach().numpy().T,
+            z2.squeeze(dim=0).detach().numpy().T,
+            metric="euclidean",
+        )
         alignment = dtw.dtw(
             x=cost,
             step_pattern="asymmetric",
@@ -128,8 +128,6 @@ def video_dtw(args, config):
             open_begin=True,
             open_end=True,
         )
-
-        # TODO: Find repeated frames in aligned DTW path for input videos, replace with interpolated frames.
 
         # Optional split-screen video view
         if args.vid1 and args.vid2:
@@ -152,7 +150,10 @@ def video_dtw(args, config):
             print("Saving video to file: {}".format(out_fname))
 
             write_video_to_file(
-                align_with_interp_fill(vid1, vid2, z1, z2, alignment), out_path
+                align_with_interp_fill(
+                    vid1, vid2, z1, z2, alignment, mean_pose, std_pose, net
+                ),
+                out_path,
             )
 
             # write_video_to_file(align_and_split_screen(vid1, vid2, alignment), out_path)

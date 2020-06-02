@@ -13,6 +13,10 @@ import numpy as np
 
 from utils.core import pad_to_height
 from utils.align import interpolate_fill, find_runs, run_boundaries
+from model.networks import AutoEncoder3x
+from utils.motion import (
+    postprocess_motion2d,
+)
 
 def load_video_to_npy(path: str) -> np.ndarray:
     try:
@@ -123,20 +127,36 @@ def align_and_split_screen(vid1: np.ndarray, vid2: np.ndarray, align: dtw.DTW) -
     vert_split = make_split_screen(vid_12, vid_21)
     return vert_split
 
-def align_with_interp_fill(vid1: np.ndarray, vid2: np.ndarray, mot1: np.ndarray, mot2: np.ndarray, align: dtw.DTW) -> np.ndarray:
+def align_with_interp_fill(vid1: np.ndarray, vid2: np.ndarray, mot1: np.ndarray, mot2: np.ndarray, align: dtw.DTW, mean_pose: np.ndarray, std_pose: np.ndarray, net: AutoEncoder3x) -> np.ndarray:
 
     # Videos with duplicated frames to create alignment
     vid_12 = apply_alignment(vid1, align.index1) 
     vid_21 = apply_alignment(vid2, align.index2) 
 
+    # VIDEO 2
+    h2, w2 = vid2.shape[1:3]
+
+    pdb.set_trace()
 
     _, starts, lengths = find_runs(align.index2)
     boundaries = run_boundaries(starts, lengths)
 
+    # Interpolation in motion embedding space for repeated frames
     mot2 = interpolate_fill(boundaries, mot2)
 
     for _, _, idx in boundaries:
+        
+        x = align.index2[idx]
         # Go from interpolated motion embedding to skeleton image
+        mot_z = mot2[idx]
+                
+        body_z = net.body_encoder(x[:, :-2, :]).repeat(1, 1, mot_z.shape[-1])
+        view_z = net.view_encoder(x[:, :-2, :]).repeat(1, 1, mot_z.shape[-1])
+
+        out = net.decoder(torch.cat([mot_z, body_z, view_z], dim=1))
+        post = postprocess_motion2d(out, mean_pose, std_pose, w2 // 2, h2 // 2)
+
+        return out
         # Replace video frame with skeleton
 
     pass

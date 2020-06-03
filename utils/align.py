@@ -5,24 +5,31 @@ from typing import List, Tuple
 
 
 def interpolate_fill(
-    boundaries: List[Tuple[int, int, List[int]]], array: np.ndarray
-) -> np.ndarray:
+    boundaries: List[Tuple[int, int, List[int]]], array: np.ndarray, axis=0
+) -> List[np.ndarray]:
     """
-    Fill duplicate duplicate indices with interpolated data
-
+    Return linear interpolated data for intermediate points between start and end in boundaries
+    
     Input:
-        indices: index array
-        array: [N,...]
+        boundaries: index array
+        array: np.ndarray
+        axis: interpolation axis
     """
-    for s, e, idx in boundaries:
-        array[idx] = interpolate_linear(array[s], array[e], n=len(idx))
+    return [
+        interpolate_linear(
+            np.take(array, s, axis=axis),
+            np.take(array, e, axis=axis),
+            n=len(idx),
+            axis=axis,
+        )
+        for s, e, idx in boundaries
+    ]
 
-    return array
 
-
-def interpolate_linear(x: np.ndarray, y: np.ndarray, n: int) -> np.ndarray:
+def interpolate_linear(x: np.ndarray, y: np.ndarray, n: int, axis=0) -> np.ndarray:
     return np.stack(
-        [np.linspace(xr, yr, n + 1, endpoint=False)[1:] for xr, yr in zip(x, y)], axis=1
+        [np.linspace(xr, yr, n + 1, endpoint=False)[1:] for xr, yr in zip(x, y)],
+        axis=axis,
     )
 
 

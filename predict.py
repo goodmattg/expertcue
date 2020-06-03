@@ -163,7 +163,6 @@ def handle3x(config, args):
     input3 = openpose2motion(
         args.vid3_json_dir, scale=scale3, max_frame=args.max_length
     )
-    pdb.set_trace()
 
     input1 = preprocess_motion2d(input1, mean_pose, std_pose)
     input2 = preprocess_motion2d(input2, mean_pose, std_pose)

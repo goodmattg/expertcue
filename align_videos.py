@@ -24,6 +24,7 @@ from utils.motion import (
     openpose2motion,
     prebundle_openpose_to_motion,
 )
+from utils.visualization import hex2rgb
 
 from common import config
 from utils.video import *
@@ -101,9 +102,18 @@ def video_dtw(args, config):
             for path, scale in [(args.vid1_kp, scale1), (args.vid2_kp, scale2)]
         ]
 
-        input1 = preprocess_motion2d(input1, mean_pose, std_pose)
-        input2 = preprocess_motion2d(input2, mean_pose, std_pose)
-        input2 = input2.to(config.device)
+        motion1 = preprocess_motion2d(input1, mean_pose, std_pose)
+        motion2 = preprocess_motion2d(input2, mean_pose, std_pose)
+
+        motion1, motion2 = motion1.to(config.device), motion2.to(config.device)
+
+        out = postprocess_motion2d(motion2, mean_pose, std_pose, w2 // 2, h2 // 2)
+
+        motion2video(
+            out, h2, w2, "blah2.mp4", hex2rgb("#a50b69#b73b87#db9dc3"),
+        )
+
+        pdb.set_trace()
 
         # load trained model
         net = get_autoencoder(config)
@@ -113,7 +123,7 @@ def video_dtw(args, config):
 
         with torch.no_grad():
             # Autoencode motion
-            z1, z2 = net.mot_encoder(input1), net.mot_encoder(input2)
+            z1, z2 = net.mot_encoder(motion1), net.mot_encoder(motion2)
 
         # Dead-simple Euclidean cost matrix in the motion embedding (static appearance agnostic)
         cost = cdist(
@@ -129,6 +139,9 @@ def video_dtw(args, config):
             open_end=True,
         )
 
+        out = net.transfer_three(motion2, motion2, motion2)
+
+        pdb.set_trace()
         # Optional split-screen video view
         if args.vid1 and args.vid2:
 
@@ -151,7 +164,16 @@ def video_dtw(args, config):
 
             write_video_to_file(
                 align_with_interp_fill(
-                    vid1, vid2, z1, z2, alignment, mean_pose, std_pose, net
+                    motion1,
+                    motion2,
+                    vid1,
+                    vid2,
+                    z1,
+                    z2,
+                    alignment,
+                    mean_pose,
+                    std_pose,
+                    net,
                 ),
                 out_path,
             )

@@ -210,6 +210,7 @@ def motion2video(
     motion_tgt=None,
     fps=25,
     save_frame=False,
+    save_video=True,
 ):
     nr_joints = motion.shape[0]
     videowriter = imageio.get_writer(save_path, fps=fps)
@@ -217,10 +218,14 @@ def motion2video(
     if save_frame:
         frames_dir = save_path[:-4] + "-frames"
         ensure_dir(frames_dir)
+
+    # frames = []
     for i in tqdm(range(vlen)):
         [img, img_cropped] = joints2image(
             motion[:, :, i], colors, transparency, H=h, W=w, nr_joints=nr_joints
         )
+        # frames.append(img)
+
         if motion_tgt is not None:
             [img_tgt, img_tgt_cropped] = joints2image(
                 motion_tgt[:, :, i], colors, transparency, H=h, W=w, nr_joints=nr_joints
@@ -232,8 +237,12 @@ def motion2video(
             img_cropped = img_cropped[:, bb[2] : bb[3], :]
         if save_frame:
             save_image(img_cropped, os.path.join(frames_dir, "%04d.png" % i))
-        videowriter.append_data(img)
+
+        if save_video:
+            videowriter.append_data(img)
+
     videowriter.close()
+    # return np.stack(frames)
 
 
 def save_image(image_numpy, image_path):

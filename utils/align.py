@@ -15,15 +15,18 @@ def interpolate_fill(
         array: np.ndarray
         axis: interpolation axis
     """
-    return [
-        interpolate_linear(
-            np.take(array, s, axis=axis),
-            np.take(array, e, axis=axis),
-            n=len(idx),
-            axis=axis,
+    terps = []
+    for s, e, idx in boundaries:
+        terps.append(
+            interpolate_linear(
+                np.take(array, s, axis=axis),
+                np.take(array, e, axis=axis),
+                n=len(idx),
+                axis=axis,
+            )
         )
-        for s, e, idx in boundaries
-    ]
+
+    return terps
 
 
 def interpolate_linear(x: np.ndarray, y: np.ndarray, n: int, axis=0) -> np.ndarray:

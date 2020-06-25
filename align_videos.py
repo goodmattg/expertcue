@@ -113,8 +113,6 @@ def video_dtw(args, config):
             out, h2, w2, "blah2.mp4", hex2rgb("#a50b69#b73b87#db9dc3"),
         )
 
-        pdb.set_trace()
-
         # load trained model
         net = get_autoencoder(config)
         net.load_state_dict(torch.load(args.model_path))
@@ -139,9 +137,6 @@ def video_dtw(args, config):
             open_end=True,
         )
 
-        out = net.transfer_three(motion2, motion2, motion2)
-
-        pdb.set_trace()
         # Optional split-screen video view
         if args.vid1 and args.vid2:
 
@@ -164,16 +159,7 @@ def video_dtw(args, config):
 
             write_video_to_file(
                 align_with_interp_fill(
-                    motion1,
-                    motion2,
-                    vid1,
-                    vid2,
-                    z1,
-                    z2,
-                    alignment,
-                    mean_pose,
-                    std_pose,
-                    net,
+                    motion1, motion2, vid1, vid2, alignment, mean_pose, std_pose, net,
                 ),
                 out_path,
             )

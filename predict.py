@@ -284,8 +284,6 @@ def main():
     else:
         handle2x(config, args)
 
-    pdb.set_trace()
-
 
 if __name__ == "__main__":
     main()

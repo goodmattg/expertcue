@@ -16,6 +16,8 @@ from model.networks import AutoEncoder3x
 from utils.motion import postprocess_motion2d
 from utils.visualization import motion2video, hex2rgb
 
+from typing import Tuple
+
 
 def load_video_to_npy(path: str) -> np.ndarray:
     try:
@@ -137,21 +139,25 @@ def align_and_split_screen(
 def align_with_interp_fill(
     motion1: np.ndarray,
     motion2: np.ndarray,
-    vid1: np.ndarray,
-    vid2: np.ndarray,
     align: dtw.DTW,
     mean_pose: np.ndarray,
     std_pose: np.ndarray,
     net: AutoEncoder3x,
+    vid1_shape: Tuple[int, int],
+    vid2_shape: Tuple[int, int],
+    vid1: np.ndarray = None,
+    vid2: np.ndarray = None,
 ) -> np.ndarray:
 
-    # Videos with duplicated frames to create alignment
-    print("Applying alignment to videos")
-    vid_12 = apply_alignment(vid1, align.index1)
-    vid_21 = apply_alignment(vid2, align.index2)
+    if vid1 and vid2:
+        # Videos with duplicated frames to create alignment
+        print("Applying alignment to videos")
+        vid_12 = apply_alignment(vid1, align.index1)
+        vid_21 = apply_alignment(vid2, align.index2)
 
     # VIDEO 2
-    h2, w2 = vid2.shape[1:3]
+    h1, w1 = vid1_shape
+    h2, w2 = vid2_shape
 
     # Find repeated frames ("runs") in the frame alignment
     _, starts, lengths = find_runs(align.index2)
@@ -173,6 +179,13 @@ def align_with_interp_fill(
             z_mot2 = net.mot_encoder(motion2)
             z_body2 = net.body_encoder(motion2[:, :-2, :]).repeat(1, 1, z_mot2.shape[-1])
             z_view2 = net.view_encoder(motion2[:, :-2, :]).repeat(1, 1, z_mot2.shape[-1])
+
+            post = net.decoder(torch.cat([z_mot2, z_body2, z_view2], dim=1))
+            out = postprocess_motion2d(post, mean_pose, std_pose, w2 // 2, h2 // 2)
+            motion2video(
+                out, h2, w2, "test1.mp4", hex2rgb("#a50b69#b73b87#db9dc3"), save_video=True
+            )
+
         # fmt: on
 
         # Interpolation in motion embedding space for repeated segments
@@ -188,25 +201,33 @@ def align_with_interp_fill(
 
         # Fill in the repeated segments in the aligned video with interpolated segments
         for (start, end, idx), interp_segment in zip(boundaries, z_mot2_fills):
-            print(start, end, idx)
-            pdb.set_trace()
-            z_mot2_hat[:, :, idx] = torch.from_numpy(interp_segment).T.unsqueeze(dim=0)
+            # pdb.set_trace()
+            # print(start, end, idx)
+            # if (
+            #     torch.isnan(torch.from_numpy(interp_segment).T.unsqueeze(dim=0).clone())
+            #     .any()
+            #     .item()
+            # ):
+            #     print("Found a interp segment with NaNs")
+            z_mot2_hat[:, :, idx] = (
+                torch.from_numpy(interp_segment).T.unsqueeze(dim=0).float()
+            )
             if torch.isnan(z_mot2_hat).any().item():
-                print("Found a interp segment with NaNs")
+                print("The interpolated embedding has NaNs")
 
-        pdb.set_trace()
+        # pdb.set_trace()
 
         # Go from interpolated motion embedding to skeleton image
         out = net.decoder(torch.cat([z_mot2_hat, z_body2_hat, z_view2_hat], dim=1))
         post = postprocess_motion2d(out, mean_pose, std_pose, w2 // 2, h2 // 2)
 
         temp_vid = motion2video(
-            post, h2, w2, "blah.mp4", hex2rgb("#a50b69#b73b87#db9dc3"), save_video=True
+            post, h2, w2, "test2.mp4", hex2rgb("#a50b69#b73b87#db9dc3"), save_video=True
         )
 
         pdb.set_trace()
-        for _, _, idx in boundaries:
-            vid_21[align.index2[idx]] = temp_vid[align_index2[idx]]
+        # for _, _, idx in boundaries:
+        #     vid_21[align.index2[idx]] = temp_vid[align_index2[idx]]
 
         return out
         # Replace video frame with skeleton

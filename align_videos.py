@@ -4,11 +4,11 @@ import os
 import sys
 import traceback
 import torch
-import pdb
 import dtw
 import imageio
 import random, string
 import torchvision
+import pdb
 
 
 from scipy.spatial.distance import cdist
@@ -107,11 +107,12 @@ def video_dtw(args, config):
 
         motion1, motion2 = motion1.to(config.device), motion2.to(config.device)
 
-        out = postprocess_motion2d(motion2, mean_pose, std_pose, w2 // 2, h2 // 2)
+        ## Uncomment for a motion-to-video sanity check
 
-        motion2video(
-            out, h2, w2, "blah2.mp4", hex2rgb("#a50b69#b73b87#db9dc3"),
-        )
+        # out = postprocess_motion2d(motion2, mean_pose, std_pose, w2 // 2, h2 // 2)
+        # motion2video(
+        #     out, h2, w2, "blah2.mp4", hex2rgb("#a50b69#b73b87#db9dc3"),
+        # )
 
         # load trained model
         net = get_autoencoder(config)
@@ -138,8 +139,8 @@ def video_dtw(args, config):
         )
 
         # Optional split-screen video view
+        vid1, vid2 = None, None
         if args.vid1 and args.vid2:
-
             vid1, vid2 = [
                 load_video_frames_to_npy(path)
                 if os.path.isdir(path)
@@ -147,24 +148,30 @@ def video_dtw(args, config):
                 for path in [args.vid1, args.vid2]
             ]
 
-            out_fname = (
-                args.out_fname
-                if args.out_fname
-                else "".join(random.choices(string.ascii_letters + string.digits, k=8))
-                + ".mp4"
-            )
+        out_fname = (
+            args.out_fname
+            if args.out_fname
+            else "".join(random.choices(string.ascii_letters + string.digits, k=8))
+            + ".mp4"
+        )
 
-            out_path = os.path.join(args.out_dir, out_fname)
-            print("Saving video to file: {}".format(out_fname))
+        out_path = os.path.join(args.out_dir, out_fname)
+        print("Saving video to file: {}".format(out_fname))
 
-            write_video_to_file(
-                align_with_interp_fill(
-                    motion1, motion2, vid1, vid2, alignment, mean_pose, std_pose, net,
-                ),
-                out_path,
-            )
+        align_with_interp_fill(
+            motion1,
+            motion2,
+            alignment,
+            mean_pose,
+            std_pose,
+            net,
+            args.v1_shape,
+            args.v2_shape,
+            vid1=vid1,
+            vid2=vid2,
+        ),
 
-            # write_video_to_file(align_and_split_screen(vid1, vid2, alignment), out_path)
+        # write_video_to_file(align_and_split_screen(vid1, vid2, alignment), out_path)
 
     except:
         print("Unable to render keypoint motion as video!")

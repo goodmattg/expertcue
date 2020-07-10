@@ -9,6 +9,7 @@ from scipy.ndimage import gaussian_filter1d
 import torch
 import argparse
 import numpy as np
+import pdb
 from dataset import get_meanpose
 from model import get_autoencoder
 from utils.visualization import motion2video, hex2rgb
@@ -143,7 +144,6 @@ def handle3x(config, args):
     h3, w3, scale3 = pad_to_height(
         config.img_size[0], args.img2_height, args.img3_width
     )
-
     # load trained model
     net = get_autoencoder(config)
     net.load_state_dict(torch.load(args.model_path))
@@ -163,6 +163,7 @@ def handle3x(config, args):
     input3 = openpose2motion(
         args.vid3_json_dir, scale=scale3, max_frame=args.max_length
     )
+
     input1 = preprocess_motion2d(input1, mean_pose, std_pose)
     input2 = preprocess_motion2d(input2, mean_pose, std_pose)
     input3 = preprocess_motion2d(input3, mean_pose, std_pose)
@@ -282,8 +283,6 @@ def main():
         handle3x(config, args)
     else:
         handle2x(config, args)
-
-    pdb.set_trace()
 
 
 if __name__ == "__main__":
